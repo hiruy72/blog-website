@@ -1,6 +1,6 @@
 "use client"
 
-import { z } from "zod"
+import { set, z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
@@ -18,46 +18,58 @@ import { authClient } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useState } from "react"
+import { se } from "date-fns/locale"
 import {
   Card,
+  CardAction,
   CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
 import { Spinner } from "./ui/spinner"
 import Link from "next/link"
 import { Separator } from "./ui/separator"
 
 // Zod schema
-const signinFormSchema = z.object({
+const signupFormSchema = z.object({
   email: z.email({ message: "Invalid email address" }),
   password: z.string().min(8, { message: "Password must be at least 8 characters" }),
+  confirmPassword: z.string()
+
+}).refine((data)=> data.password === data.confirmPassword,{
+  message: "Passwords do not match", 
+  path: ["confirmPassword"],
 })
 
-type SignInFormValues = z.infer<typeof signinFormSchema>
+type SignUpFormValues = z.infer<typeof signupFormSchema>
 
 
-export default function SignInForm() {
+export default function SignUpForm() {
       const [isLoading, setIsLoading] = useState(false)
      const router = useRouter()
-      const form = useForm<SignInFormValues>({
-    resolver: zodResolver(signinFormSchema),
+      const form = useForm<SignUpFormValues>({
+    resolver: zodResolver(signupFormSchema),
     defaultValues: {
       email: "",
       password: "",
+      confirmPassword: "",
     },
   })
 
-  const onSubmit =async (values: SignInFormValues) =>{
+  const onSubmit =async (values: SignUpFormValues) =>{
     try {
       setIsLoading(true)
-      await authClient.signIn.email({
+      await authClient.signUp.email({
+        name: values.email,
         email: values.email,
         password: values.password,
         callbackURL: "/",
       },{
         onSuccess: () => {
-          toast.success("Signed in successfully")
+          toast.success("Account Created successfully")
           router.push("/")
         }
         ,
@@ -75,24 +87,12 @@ export default function SignInForm() {
     }
 
 }
-  const signInWithGithub = async () => {
-    await authClient.signIn.social({
-      provider: "github",
-      callbackURL: "/",
-  })
-  }
 
-  const signInWithGoogle = async () => {
-    await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/",
-    })
-  }
   return (
 
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle>Login to your account</CardTitle>
+        <CardTitle>Create account</CardTitle>
        
       
       </CardHeader>
@@ -125,22 +125,35 @@ export default function SignInForm() {
                    
                     <FormMessage />
         </FormItem>
+        
+    )}
+    />
+     <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                        <Input placeholder="Enter your Password" {...field} type="password"/>
+                    </FormControl>
+                   
+                    <FormMessage />
+        </FormItem>
+        
     )}
     />
     <Button type="submit" className="cursor-pointer"> 
-      {isLoading ? <Spinner/> :  "Sign In"}
+      {isLoading ? <Spinner/> :  "Sign Up"}
     </Button>
     <p>
-      Don't have an account? {" "}
-      <Link href="/sign-up" className="text-blue-900">Sign up</Link>
+      Already have and account ? {" "}
+      <Link href="/sign-in" className="text-blue-900"> Signin</Link>
     </p>
 
-    <Separator/>
-
-    <Button type="button" className="text-[13px] cursor-pointer" onClick={signInWithGithub}> Continue With Github </Button>
-    <Button type="button" className="text-[13px] cursor-pointer" onClick={signInWithGoogle}> Continue With Google </Button>
-              </form>
-           </Form>
+ 
+       </form>
+   </Form>
       </CardContent>
      
     </Card>
