@@ -88,6 +88,20 @@ export default function SignUpForm() {
 
 }
 
+  const signInWithGithub = async () => {
+    await authClient.signIn.social({
+      provider: "github",
+      callbackURL: "/",
+  })
+  }
+
+  const signInWithGoogle = async () => {
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/",
+    })
+  }
+
   return (
 
     <Card className="w-full max-w-sm">
@@ -151,6 +165,9 @@ export default function SignUpForm() {
       <Link href="/sign-in" className="text-blue-900"> Signin</Link>
     </p>
 
+     <Separator/>
+      <Button type="button" className="text-[13px] cursor-pointer" onClick={signInWithGithub}> Continue With Github </Button>
+      <Button type="button" className="text-[13px] cursor-pointer" onClick={signInWithGoogle}> Continue With Google </Button>
  
        </form>
    </Form>
