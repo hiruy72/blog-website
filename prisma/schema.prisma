@@ -11,9 +11,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = env("DATABASE_URL")
 }
-
 model User {
   id            String    @id
   name          String
@@ -24,6 +23,9 @@ model User {
   updatedAt     DateTime  @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
+  posts        Post[]
+  catagories   Catagory[]
+  savedPosts   String[]  @default([]) 
 
   @@unique([email])
   @@map("user")
@@ -72,4 +74,37 @@ model Verification {
   updatedAt  DateTime @default(now()) @updatedAt
 
   @@map("verification")
+}
+
+model Post {
+  id    String  @id @default(uuid())
+  title String
+  slug String  @unique
+  content String
+  imageUrl String
+  view     Int    @default(0)
+  tags  String[]
+  status PostStatus @default(published)
+  userId String
+  user   User    @relation(references: [id], fields: [userId], onDelete: Cascade)
+  catagoryId String?
+  catagory Catagory? @relation(references: [id], fields: [catagoryId], onDelete: Cascade)   
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Catagory {
+  id    String  @id @default(uuid())
+  name  String  
+  userId String
+  user  User    @relation(references: [id], fields: [userId], onDelete: Cascade)
+  posts Post[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+enum PostStatus {
+  published
+  draft
+
 }
