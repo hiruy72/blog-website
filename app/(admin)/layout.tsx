@@ -7,8 +7,8 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
 
     <SidebarProvider>
       <AppSidebar />
-      <div className="p-6">
-        <SidebarTrigger />
+      <div className="p-6 w-full ">
+        
         {children}
       </div>
     </SidebarProvider>
