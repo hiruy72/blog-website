@@ -1,6 +1,6 @@
 "use client"
 import { useForm } from "react-hook-form";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import {object, z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "./ui/input";
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { generateSlug } from "@/lib/utils";
 
 
 const CreatableSelect = dynamic(()=> import('react-select/creatable'), {ssr: false})
@@ -19,8 +20,8 @@ const CreatableSelect = dynamic(()=> import('react-select/creatable'), {ssr: fal
 
 const formSchema = z.object({
     id: z.string().optional(),
-    title: z.string('Title is required'),
-    content: z.string('content is required'),
+    title: z.string().min(3,{message : "Title required"}),
+    content: z.string().min(3,{message: "Content is required" }),
     imageUrl: z.string('Image URL is required'),
     catagoryId: z.string('Catagory is required'),
     tags: z.array(object({
@@ -29,7 +30,7 @@ const formSchema = z.object({
     })),
     status:z.string(),
     
-    slug: z.string('Slug is required'),
+    slug: z.string().min(3,{message: 'Slug is required'}),
     catagories: z.array(z.object({id: z.string(), name: z.string()})).optional(),
 })
 
@@ -39,7 +40,8 @@ export default function PostForm({id,title,content,imageUrl,catagoryId,tags,stat
     const router = useRouter()
     const form = useForm({
         resolver: zodResolver(formSchema),
-        defaultValues: {id,title,content,imageUrl,catagoryId,tags,status,slug,catagories}
+        defaultValues: {id,title,content,imageUrl,catagoryId,tags,status,slug,catagories},
+        mode: "onBlur",
     })
 
 
@@ -64,9 +66,17 @@ export default function PostForm({id,title,content,imageUrl,catagoryId,tags,stat
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input placeholder="title" {...field} />
+                <Input placeholder="title" {...field}  onBlur={e=>{
+                  field.onBlur();
+                  if(!form.getValues('slug')){
+                    form.setValue('slug', generateSlug(e.target.value),{
+                      shouldValidate: true,
+                      shouldDirty:true,
+                    })
+                  }
+                }}/>
               </FormControl>
-              
+              <FormMessage/>
             </FormItem>
           )}
         />
@@ -81,6 +91,7 @@ export default function PostForm({id,title,content,imageUrl,catagoryId,tags,stat
               <FormControl>
                 <Input placeholder="Slug" {...field} />
               </FormControl>
+              <FormMessage/>
               
             </FormItem>
           )}
@@ -99,6 +110,7 @@ export default function PostForm({id,title,content,imageUrl,catagoryId,tags,stat
                     onChange={(url) => field.onChange(url)}
                 />
               </FormControl>
+              <FormMessage/>
               
             </FormItem>
           )}
@@ -113,6 +125,7 @@ export default function PostForm({id,title,content,imageUrl,catagoryId,tags,stat
               <FormControl>
                 <Input placeholder="Content" {...field} />
               </FormControl>
+              <FormMessage/>
               
             </FormItem>
           )}
@@ -140,6 +153,7 @@ export default function PostForm({id,title,content,imageUrl,catagoryId,tags,stat
                 />
               </FormControl>
               
+              
             </FormItem>
           )}
         />
@@ -160,7 +174,7 @@ export default function PostForm({id,title,content,imageUrl,catagoryId,tags,stat
                       <Select {...field} onValueChange={field.onChange} defaultValue={catagoryId}>
 
                         <SelectTrigger className="w-full">
-                          <SelectValue className="catagory"/>
+                          <SelectValue placeholder="Catagory"/>
 
 
                         </SelectTrigger>
@@ -188,7 +202,7 @@ export default function PostForm({id,title,content,imageUrl,catagoryId,tags,stat
                       <Select {...field} onValueChange={field.onChange} defaultValue={status}>
 
                         <SelectTrigger className="w-full">
-                          <SelectValue className="catagory"/>
+                          <SelectValue placeholder="Status"/>
 
 
                         </SelectTrigger>
