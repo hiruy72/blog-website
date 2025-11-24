@@ -6,10 +6,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "./ui/input";
 import ImageUploader from "./image-uploader";
 import dynamic from "next/dynamic";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
-const CreatableSelect = dynamic(()=> import(
-    'react-select/creatable', {ssr: false})
-)
+
+const CreatableSelect = dynamic(()=> import('react-select/creatable'), {ssr: false})
+
 
 
 const formSchema = z.object({
@@ -38,7 +40,7 @@ export default function PostForm({id,title,content,imageUrl,catagoryId,tags,stat
     })
     return(
     <Form {...form}>
-      <form >
+      <form className="grid grid-cols-2 gap-6">
         <div className="flex flex-col space-6">
         <FormField
           control={form.control}
@@ -107,14 +109,63 @@ export default function PostForm({id,title,content,imageUrl,catagoryId,tags,stat
             <FormItem>
               <FormLabel>Tags</FormLabel>
               <FormControl>
-               
+                <CreatableSelect
+                isMulti
+                isClearable
+                {...field}
+                onCreateOption={value=>{
+                  const newOption = {
+                    label: value,
+                    value: value.toLocaleLowerCase()
+                    }
+                    field.onChange([...field.value, newOption])
+                }}
+
+                components={{IndicatorsContainer: ()=> null}}
+                />
               </FormControl>
               
             </FormItem>
           )}
         />
         </div>
-    
+        <div className="flex flex-col gap-6">
+          <Card className="w-full max-w-sm">
+            <CardHeader>
+              <CardTitle>Extra Settings</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-6">
+                <FormField
+                control={form.control}
+                name="catagoryId"
+                render={({field})=>(
+                  <FormItem>
+                    <FormLabel>Catagory</FormLabel>
+                    <FormControl>
+                      <Select {...field} onValueChange={field.onChange} defaultValue={catagoryId}>
+
+                        <SelectTrigger className="w-ful">
+                          <SelectValue className="catagory"/>
+
+
+                        </SelectTrigger>
+                        <SelectContent>
+                          {catagories?.map(catagory=>(
+                            <SelectItem key={catagory.id} value={catagory.id}>
+                              {catagory.name}
+                            </SelectItem>
+    ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+    )}
+                />
+            </CardContent>
+            
+          </Card>
+
+        </div>
       </form>
     </Form>
     )

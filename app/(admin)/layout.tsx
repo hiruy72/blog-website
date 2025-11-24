@@ -7,10 +7,10 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
 
     <SidebarProvider>
       <AppSidebar />
-      <main>
+      <div className="p-6">
         <SidebarTrigger />
         {children}
-      </main>
+      </div>
     </SidebarProvider>
 
     )

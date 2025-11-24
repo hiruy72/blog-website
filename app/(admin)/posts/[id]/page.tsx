@@ -1,8 +1,19 @@
+import PostForm from "@/components/post-form";
 
 export default function PostPage() {
   return (
-    <div>
-      <h1>Post page</h1>
+    <div className="p-8 flex flex-col">
+      <PostForm
+        id=""
+        title=""
+        content=""
+        imageUrl=""
+        catagoryId=""
+        tags= {[]}
+        status= ""
+        slug=""
+        catagories={[]}
+      />
     </div>
   )
 }
